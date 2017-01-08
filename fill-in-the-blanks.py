@@ -6,8 +6,6 @@ References:
 2. https://storage.googleapis.com/supplemental_media/udacityu/7710122499/madlibs_generator.py
 """
 
-waiting_for_user_input = True
-game_level = 0
 guess_items_in_level = ""
 string_to_guess = ""
 answers = ""
@@ -56,61 +54,79 @@ def integrate_answer(_guess, _array_to_guess, _guess_item):
 
             return _array_to_guess
 
+def get_level():
+
+    waiting_for_user_input = True
+    game_level = 0
+
+    while waiting_for_user_input:
+
+        _game_level = raw_input("Select a Level (1, 2, 3): ")
+
+        if _game_level == "1":
+            waiting_for_user_input = False
+        elif _game_level == "2":
+            waiting_for_user_input = False
+        elif _game_level == "3":
+            waiting_for_user_input = False
+        else:
+            user_output("You picked a level that does not exist.")
+
+    return _game_level
+
+def play_game(_rules):
+
+    max_guesses = _rules[0]
+    string_to_guess = _rules[1]
+    guess_items_in_level = _rules[2]
+    answers = _rules[3]
+    score = 0
+    array_to_guess = string_to_guess.split()
+    playing = True
+
+    for guess_item in guess_items_in_level:
+        waiting_for_user_input = True
+        guess_counter = 0
+
+        while waiting_for_user_input and playing:
+
+            user_output(string_to_guess)
+
+            guess = raw_input("Guess an answer for ___" + str(guess_item + 1) + "___: ")
+
+            if guess == answers[guess_item]:
+                user_output("Correct!")
+                score += 1
+                waiting_for_user_input = False
+                array_to_guess = integrate_answer(guess, array_to_guess, "___" + str(guess_item + 1) + "___")
+                string_to_guess = " ".join(array_to_guess)
+
+            else:
+                guess_counter +=1
+                print "Wrong answer. Guesses left: " + str(max_guesses - guess_counter) + "."
+                if guess_counter >= max_guesses:
+                    print "Game over."
+                    playing = False
+                    break
+
+    return [score, string_to_guess]
+
+
 # Main --
 
 user_output("Welcome to the IPN Game.")
 
-while waiting_for_user_input:
-
-    game_level = raw_input("Select a Level (1, 2, 3): ")
-
-    if game_level == "1":
-        waiting_for_user_input = False
-    elif game_level == "2":
-        waiting_for_user_input = False
-    elif game_level == "3":
-        waiting_for_user_input = False
-    else:
-        user_output("You picked a level that does not exist.")
+game_level = get_level()
 
 rules = get_rules(game_level)
 
-max_guesses = rules[0]
-string_to_guess = rules[1]
-guess_items_in_level = rules[2]
-answers = rules[3]
 game_description = rules[4]
-score = 0
+guess_items_in_level = rules[2]
+
 
 user_output("You picked Level " + game_level + " - " + game_description  + ".")
 
-array_to_guess = string_to_guess.split()
-playing = True
+results = play_game(rules)
 
-for guess_item in guess_items_in_level:
-    waiting_for_user_input = True
-    guess_counter = 0
-
-    while waiting_for_user_input and playing:
-
-        user_output(string_to_guess)
-
-        guess = raw_input("Guess an answer for ___" + str(guess_item + 1) + "___: ")
-
-        if guess == answers[guess_item]:
-            user_output("Correct!")
-            score += 1
-            waiting_for_user_input = False
-            array_to_guess = integrate_answer(guess, array_to_guess, "___" + str(guess_item + 1) + "___")
-            string_to_guess = " ".join(array_to_guess)
-
-        else:
-            guess_counter +=1
-            print "Wrong answer. Guesses left: " + str(max_guesses - guess_counter) + "."
-            if guess_counter >= max_guesses:
-                print "Game over."
-                playing = False
-                break
-
-if score == len(guess_items_in_level):
-    user_output("You won!--> " + string_to_guess)
+if results[0] == len(guess_items_in_level):
+    user_output("You won!--> " + results[1])
